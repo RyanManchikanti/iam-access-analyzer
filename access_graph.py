@@ -95,6 +95,9 @@ def detect_toxic_combos(user_perms):
             if combo.issubset(perms):
                 alerts.append((user, combo))
     return alerts
+def generate_toxic_csv(alerts):
+    rows = [{"User": user, "Toxic_Permissions": ", ".join(combo)} for user, combo in alerts]
+    return pd.DataFrame(rows).to_csv(index=False).encode('utf-8')
 
 
 def visualize_graph(G, alerts):
@@ -144,6 +147,18 @@ def main():
         # fig = visualize_graph(G, toxic_users)
         # st.pyplot(fig)
         visualize_pyvis_graph(G, toxic_users)
+
+        if toxic_users:
+            st.subheader("Toxic Permission Alerts:")
+            for user, combo in toxic_users:
+                st.error(f"⚠️ User '{user}' has toxic permission combo: {', '.join(combo)}")
+
+            # New Export Button
+            toxic_csv = generate_toxic_csv(toxic_users)
+            st.download_button("⬇️ Download Toxic Users CSV", toxic_csv, "toxic_users.csv", "text/csv")
+
+
+        st.header("Result achieved heck yea !!!")
 
 if __name__ == '__main__':
     main()
